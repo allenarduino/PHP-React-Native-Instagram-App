@@ -21,19 +21,13 @@ const People = ({ navigation }) => {
   const [users, setUsers] = React.useState([]);
   const [loading, controlLoading] = React.useState(true);
   const [formVisible, setFormVisible] = React.useState(false);
-  const [arrayHolder, setArrayHolder] = React.useState([]);
-  const [query, setQuery] = React.useState("");
+  const [filteredData, setFilteredData] = React.useState([]);
+  const [search, setSearch] = React.useState("");
   const { state, dispatch } = React.useContext(AuthContext);
   let url = state.url;
 
   const showForm = () => {
     setFormVisible(true);
-  };
-
-  const searchFilterFunction = () => {
-    const newData = arrayHolder.filter(item => {
-      const itemData = `${item.name.title}`;
-    });
   };
 
   const fetch_users = () => {
@@ -46,83 +40,70 @@ const People = ({ navigation }) => {
     })
       .then(res => res.json())
       .then(data => {
+        setFilteredData(data);
         setUsers(data);
-        setArrayHolder(data);
         controlLoading(false);
       })
       .catch(err => console.log(err));
   };
 
+  const searchFilterFunction = text => {
+    if (text) {
+      const newData = users.filter(function(item) {
+        const itemData = item.full_name
+          ? item.full_name.toUpperCase()
+          : "".toUpperCase();
+        const textData = text.toUpperCase();
+        return itemData.indexOf(textData) > -1;
+      });
+      setFilteredData(newData);
+      setSearch(text);
+    } else {
+      setFilteredData(users);
+      setSearch(text);
+    }
+  };
+
   React.useEffect(() => {
     fetch_users();
   }, []);
-  const renderItemComponent = data => {
-    <TouchableOpacity style={styles.container}>
-      <Image
-        styles={styles.userImage}
-        source={{ uri: `${url}/code_reservoir/${data.user_img}` }}
-      />
-    </TouchableOpacity>;
-  };
-
-  const ItemSeparator = () => (
-    <View
-      style={{
-        height: 2,
-        backgroundColor: "rgba(0,0,0,0,0.5)",
-        marginLeft: 10,
-        marginRight: 10
-      }}
-    ></View>
-  );
-
-  const renderSeparator = () => {
-    return (
-      <View
-        style={{
-          height: 1,
-          width: "86%",
-          backgroundColor: "#CED0CE",
-          marginLeft: "5%"
-        }}
-      ></View>
-    );
-  };
 
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <Header
         placement="left"
         leftComponent={
-          formVisible ? (
+          !formVisible ? (
             <Text style={{ fontSize: 20, fontWeight: "bold", color: "black" }}>
               Find Users
             </Text>
           ) : null
         }
         centerComponent={
-          !formVisible ? (
-            <
+          formVisible ? (
+            <TextInput
               //autoCapitalize="none"
               //autoCorrect={false}
-              onChangeText={() => handleSearch()}
-              //status="info"
+              onChangeText={text => searchFilterFunction(text)}
+              value={search}
               placeholder="Search users..."
               style={{
                 borderRadius: 25,
                 borderColor: "#333",
                 backgroundColor: "#fff",
-              }}
-              textStylye={{
-                color:"#000",
-                clearButtonMode="always"
+                fontSize: 18
               }}
             />
           ) : null
         }
         rightComponent={
-          formVisible ? (
-            <Icon name="search" style={{ marginTop: 6 }} size={20} />
+          !formVisible ? (
+            <Icon
+              name="search"
+              style={{ marginTop: 6 }}
+              size={20}
+              onPress={() => showForm()}
+            />
           ) : null
         }
         containerStyle={{
@@ -148,10 +129,12 @@ const People = ({ navigation }) => {
             />
           </View>
         ) : (
-          users.map(item => (
+          filteredData.map(item => (
             <RectButton
               onPress={() =>
-                navigation.navigate("SingleProfile", { user_id: item.user_id })
+                navigation.navigate("SingleProfile", {
+                  user_id: item.user_id
+                })
               }
             >
               <View
