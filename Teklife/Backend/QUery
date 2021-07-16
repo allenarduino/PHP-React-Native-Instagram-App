@@ -1,0 +1,3 @@
+SELECT post_caption,
+(SELECT post_liker FROM post_likes pl WHERE pl.post_liker=7 AND pl.L_post_id=p.p_id)
+ as post_liker FROM posts p ORDER BY p.p_id DESC LIMIT 10

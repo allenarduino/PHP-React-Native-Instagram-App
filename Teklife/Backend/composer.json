@@ -1,0 +1,6 @@
+{
+    "require": {
+        "firebase/php-jwt": "^5.2",
+        "rase/socket.io-emitter": "^0.7.0"
+    }
+}

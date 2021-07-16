@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Using sse</title>
+
+    <script>
+      window.onload = function() {
+        var source = new EventSource("sse.php");
+        source.onmessage = function(event) {
+          document.getElementById("result").innerHTML +=
+            "New time received from server :" + event.data + "<br/>";
+        };
+      };
+    </script>
+  </head>
+  <body>
+    <div id="result">
+      <!----Server response------>
+    </div>
+  </body>
+</html>
